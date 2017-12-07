@@ -53,18 +53,36 @@ def read_gzip_data(path):
 ############################
 
 
+def missing_null(x):
+    if x == '':
+        return -1
+    else:
+        return x
+
+
+def change_vars_type(in_data, string_list=[]):
+    num = 0
+    for col in in_data.columns:
+        if col in string_list:
+            continue
+        elif num < 20:
+            num += 1
+            in_data[col] = in_data[col].apply(lambda x: missing_null(x)).astype('float')
+    return in_data
+
+
 def read_gz_csv(path):
     data_list = []
     col_names = []
     if os.path.exists(path):
         with gzip.open(path, 'r') as f:
             for i, j in enumerate(f):
-                if i <= 1:
-                    print(f.readline()[10])
-                    # col_names = f.readline().split(',')
-                # if 1 <= i <= 10:
-                #     data_list.append(f.readline().split(','))
+                line = str(j, encoding='utf-8').upper()
+                if i == 0:
+                    col_names = line.split(',')
+                else:
+                    data_list.append(line.split(','))
     else:
         print('the path [{}] is not exist!'.format(path))
-    df = pd.DataFrame(data_list, columns = col_names)
+    df = pd.DataFrame(data_list, columns=col_names)
     return df
