@@ -10,7 +10,6 @@ import gzip
 import numpy as np
 import pandas as pd
 import json
-import preprocess_var
 
 
 def get_var(bom_json):
@@ -38,41 +37,52 @@ def read_gzip_data(path):
     if os.path.exists(path):
         with gzip.open(path, 'r') as f:
             for i, j in enumerate(f):
-                if 0 <= i <= 10:
-                    bom_json = json.loads(j[1:-2])
-                    dic_i = get_var(bom_json)
-                    print(num, bom_json['appId'])
-                    num += 1
-                    data_list.append(dic_i)
+                bom_json = json.loads(j[1:-2])
+                dic_i = get_var(bom_json)
+                print(num, bom_json['appId'])
+                num += 1
+                data_list.append(dic_i)
     else:
         print('the path [{}] is not exist!'.format(path))
     return data_list
 
-gzip_data = read_gzip_data(r'E:\dev_code\model_ori1120_08.gz')
-df = pd.DataFrame(gzip_data)
+############################
+#
+# 读取压缩包中csv文件
+#
+############################
 
 
-def col_group(x):
-    if x.startswith('call'):
-        return 'call'
-    elif x.startswith('net'):
-        return 'net'
-    elif x.startswith('sms'):
-        return 'sms'
-    return 'other'
-
-df_col = df.columns
-col_names = map(lambda x: col_group(x), df_col)
-col_zip = zip(col_names, df_col)
-df1 = df.ix[:, [col2 for (col1, col2) in col_zip if col1 in ('other', 'call')]]
-
-print(df1.shape)
+def missing_null(x):
+    if x == '':
+        return -1
+    else:
+        return x
 
 
+def change_vars_type(in_data, string_list=[]):
+    num = 0
+    for col in in_data.columns:
+        if col in string_list:
+            continue
+        elif num < 20:
+            num += 1
+            in_data[col] = in_data[col].apply(lambda x: missing_null(x)).astype('float')
+    return in_data
 
-# df1 = pd.read_csv(r'E:\dev_code\model_ori1120_08.csv', encoding='GBK')
-miss_df = preprocess_var.missing_vars(df1, missing_flag=['NaN', '-1.0', '', '-1'], drop_cols=['applyid', 'apply_no'])
 
-print('output.....')
-df1.to_csv(r'E:\dev_code\model_ori1120_08_1.csv', index=False)
-print('done.....')
+def read_gz_csv(path):
+    data_list = []
+    col_names = []
+    if os.path.exists(path):
+        with gzip.open(path, 'r') as f:
+            for i, j in enumerate(f):
+                line = str(j, encoding='utf-8').upper()
+                if i == 0:
+                    col_names = line.split(',')
+                else:
+                    data_list.append(line.split(','))
+    else:
+        print('the path [{}] is not exist!'.format(path))
+    df = pd.DataFrame(data_list, columns=col_names)
+    return df

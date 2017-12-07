@@ -34,3 +34,4 @@ def missing_vars(in_data, missing_flag=[], drop_cols=[]):
     return pd.DataFrame(missing_pct, columns=['var_name', 'total_cnt', 'missing_pct', 'unique'])
 
 
+
