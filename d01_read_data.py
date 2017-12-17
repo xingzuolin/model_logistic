@@ -10,6 +10,8 @@ import gzip
 import numpy as np
 import pandas as pd
 import json
+from sklearn import model_selection
+import time
 
 
 def get_var(bom_json):
@@ -53,24 +55,6 @@ def read_gzip_data(path):
 ############################
 
 
-def missing_null(x):
-    if x == '':
-        return -1
-    else:
-        return x
-
-
-def change_vars_type(in_data, string_list=[]):
-    num = 0
-    for col in in_data.columns:
-        if col in string_list:
-            continue
-        elif num < 20:
-            num += 1
-            in_data[col] = in_data[col].apply(lambda x: missing_null(x)).astype('float')
-    return in_data
-
-
 def read_gz_csv(path):
     data_list = []
     col_names = []
@@ -86,3 +70,40 @@ def read_gz_csv(path):
         print('the path [{}] is not exist!'.format(path))
     df = pd.DataFrame(data_list, columns=col_names)
     return df
+
+############################
+#
+# 读取csv文件
+#
+############################
+
+
+def read_csv_data(path):
+    df = pd.read_csv(path)
+    return df
+
+
+def data_split(df_data, tag, data_size, only_gb=True):
+    if only_gb:
+        df_data = df_data[df_data[tag].isin([0, 1])]
+    if len(df_data[df_data[tag] == 0]) == 0 or len(df_data[df_data[tag] == 1]) == 0:
+        print('Error: there is only the good or bad data')
+        return df_data, df_data
+    df_y = df_data[tag]
+    df_x = df_data.drop(tag, axis=1)
+    x_train, x_test, y_train, y_test = model_selection.train_test_split(
+        df_x, df_y, test_size=data_size, random_state=256)
+    df_train = pd.concat([x_train, y_train], axis=1)
+    df_test = pd.concat([x_test, y_test], axis=1)
+    return df_train, df_test
+
+
+def data_path(base_path, save_path):
+    time_format = '%Y-%m-%d %X'
+    time_now = time.strftime(time_format, time.localtime())
+    try:
+        os.mkdir(base_path + '/' + str(time_now)[:10] + '_' + save_path)
+    except:
+        print('PATH HAS EXIST')
+    path_ = base_path + '/' + str(time_now)[:10] + '_' + save_path
+    return path_

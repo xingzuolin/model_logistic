@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import json
 import preprocess_var
-from d01_read_data import read_gz_csv,change_vars_type
+from d01_read_data import read_gz_csv,read_csv_data
 
 
 def col_group(x):
@@ -37,17 +37,21 @@ def col_group(x):
 #
 #########################
 
-path = r'F:\Quark\dev_code\model_ori1120_01_s.gz'
-
-df = read_gz_csv(path)
-
-print(df.shape)
-df1 = change_vars_type(df,['APPID', 'APPLYNO', 'APPLYTIME', 'APPLYDATE', 'SUBMITAPPLYDATE', 'SUBMITAPPLYTIME'])
-print(df.dtypes)
+# path = r'F:\Quark\dev_code\model_ori1120_01_s.gz'
+#
+# df = read_gz_csv(path)
+#
+# print(df.shape)
+# df1 = change_vars_type(df,['APPID', 'APPLYNO', 'APPLYTIME', 'APPLYDATE', 'SUBMITAPPLYDATE', 'SUBMITAPPLYTIME'])
+# print(df.dtypes)
 
 # df1 = pd.read_csv(r'E:\dev_code\model_ori1120_08.csv', encoding='GBK')
 # miss_df = preprocess_var.missing_vars(df, missing_flag=['NaN', '-1.0', '', '-1'], drop_cols=['applyid', 'apply_no'])
-#
+
+
+
+
+
 print('output.....')
-# miss_df.to_csv(r'F:\Quark\dev_code\model_ori1120_08_1.csv', index=False)
+df1.to_csv(r'F:\Quark\dev_code\model_ori1120_01_md.csv', index=False)
 print('done.....')
