@@ -26,8 +26,8 @@ def path_df(path, factor_name, tag):
 def verify_factor(x):
     if x in ['NA', 'NAN', '', ' ', 'MISSING', 'NONE', 'NULL']:
         return 'NAN'
-    if re.match('^\-?\d*\.?\d+$', x):
-        x = float(x)
+    # if re.match('^\-?\d*\.?\d+$', x):
+    #     x = float(x)
     return x
 
 
@@ -58,7 +58,7 @@ def sum_by_gb(data, var_name, tag, bad_name, good_name):
 
 
 def find_best_bin(path, data=pd.DataFrame(), var_name='', tag='', total_name='total', bad_name='bad',
-                  good_name='good', not_in_list=[]):
+                  good_name='good', bin_num=10, not_in_list=[]):
     # none_list = ['NA', 'NAN', '', ' ', 'MISSING', 'NONE', 'NULL']
     if path != '':
         data = path_df(path, var_name, tag)
@@ -79,12 +79,16 @@ def find_best_bin(path, data=pd.DataFrame(), var_name='', tag='', total_name='to
     else:
         not_na_df = data_df
         na_df = pd.DataFrame()
-    if len(data_df) == 0:
+    if len(not_na_df) == 0:
         print('Error: the data is wrong')
         data = pd.DataFrame()
         return data
+    not_na_df['bad_rate'] = not_na_df[bad_name]*1.0/(not_na_df[bad_name] + not_na_df[good_name])
+    not_na_df = not_na_df.sort_values(by=['bad_rate', var_name], ascending=False)
+    not_na_df[var_name] = not_na_df[var_name].astype(str)
+    not_na_df.index = range(len(not_na_df))
     return not_na_df
 if __name__ == '__main__':
-    print(find_best_bin(path=r'F:\Quark\dev_code\model_data.csv', var_name='antiscore', tag='acquisition_is_bad'
-      , not_in_list=['NaN', '-1.0', '', '-1']))
+    print(find_best_bin(path=r'F:\Quark\dev_code\model_data.csv', var_name='call_2way_0106_days_sum_j1m', tag='acquisition_is_bad',
+                        not_in_list=['NaN', '-1.0', '', '-1']))
 
